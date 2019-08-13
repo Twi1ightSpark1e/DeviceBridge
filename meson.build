@@ -11,9 +11,15 @@ src = [
 compiler = meson.get_compiler('cpp')
 cppfs_dep = compiler.find_library('c++fs')
 
+cmake = import('cmake')
+
+libblepp_proj = cmake.subproject('libblepp')
+libblepp_dep  = libblepp_proj.dependency('ble++')
+
 exe = executable('devicebridge', src,
     include_directories : inc, dependencies : [
-        cppfs_dep
+        cppfs_dep,
+        libblepp_dep
         ])
 
 test('basic', exe)

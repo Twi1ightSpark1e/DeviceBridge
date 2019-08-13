@@ -1,0 +1,6 @@
+[wrap-git]
+directory = libblepp
+url = https://github.com/edrosten/libblepp.git
+revision = 099a0ac
+
+# vim: ft=dosini
