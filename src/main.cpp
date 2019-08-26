@@ -1,5 +1,6 @@
-#include <iostream>
+#include <devicebridge/application.hpp>
 
 int main(int argc, const char *argv[]) {
-    return 0;
+    DeviceBridge::application app(argc, argv);
+    return app.start();
 }
