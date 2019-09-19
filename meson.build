@@ -5,12 +5,14 @@ project('devicebridge', 'cpp',
 
 inc = include_directories('include')
 src = [
+    'src/application.cpp',
+    'src/configuration.cpp',
     'src/main.cpp',
-    'src/application.cpp'
+    'src/neighbour.cpp'
     ]
 
 compiler = meson.get_compiler('cpp')
-cppfs_dep = compiler.find_library('c++fs')
+cppfs_dep = compiler.find_library('stdc++fs')
 
 qt5 = import('qt5')
 qt5_dep = dependency('qt5', modules : [ 'Bluetooth' ])

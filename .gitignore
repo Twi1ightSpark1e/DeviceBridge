@@ -1,2 +1,3 @@
 build/
+build-stdlibcpp/
 compile_commands.json
