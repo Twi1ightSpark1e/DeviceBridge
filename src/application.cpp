@@ -36,15 +36,17 @@ namespace DeviceBridge {
         { // load configuration
             try {
                 auto res = m_strargs.at("config");
-                if (m_config.set_path(res)) {
-                    throw std::exception();
-                }
+                auto err = m_config.set_path(res);
+                if (err) { return err; }
             } catch (const std::out_of_range &exc) {
-                std::cerr << "Configuration file is not set\n";
-                return error_code(error_code::FILE_NOT_OPENED);
+                return error_code(
+                        error_code::FILE_NOT_OPENED,
+                        "Configuration file is not set");
             } catch (const std::exception &exc) {
                 std::cerr << "Generic error\n";
-                return error_code(error_code::FILE_NOT_OPENED);
+                return error_code(
+                        error_code::FILE_NOT_OPENED,
+                        "Generic error");
             }
         }
 

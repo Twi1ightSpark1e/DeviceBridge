@@ -5,9 +5,5 @@
 
 int main(int argc, char *argv[]) {
     DeviceBridge::application app(argc, argv);
-    auto result = app.start();
-    if (result.raw() != DeviceBridge::error_code::NO_ERROR) {
-        std::cout << result.to_string() << std::endl;
-    }
-    return result.raw();
+    return app.start().normal_exit();
 }

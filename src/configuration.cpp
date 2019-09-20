@@ -21,14 +21,17 @@ namespace DeviceBridge {
     }
 
     error_code configuration::parse_file() {
+        errno = 0;
         std::ifstream config_file(m_path);
         if (!config_file.is_open()) {
-            return error_code(error_code::FILE_NOT_OPENED);
+            return error_code(error_code::FILE_NOT_OPENED, strerror(errno));
         }
         const auto &config = YAML::Load(config_file);
 
         if (!config["capabilities"]) {
-            return error_code(error_code::MALFORMED_CONFIGURATION);
+            return error_code(
+                    error_code::MALFORMED_CONFIGURATION,
+                    "There are no capabilities described");
         }
 
         const auto &capabilities = config["capabilities"];
@@ -45,7 +48,9 @@ namespace DeviceBridge {
         const auto &neighbors = config["neighbors"];
         for (auto nei_node: neighbors) {
             if (!nei_node["name"] || !nei_node["connectivity"]) {
-                return error_code(error_code::MALFORMED_CONFIGURATION);
+                return error_code(
+                        error_code::MALFORMED_CONFIGURATION,
+                        "One of neighbors does not have name or connectivity methods");
             }
 
             auto &n = m_neighbors.emplace_back();
@@ -64,8 +69,9 @@ namespace DeviceBridge {
                             con_info.type = "ip";
                             con_info.value = l["ip"].as<std::string>();
                         } else {
-                            // TODO: add message
-                            return error_code(error_code::MALFORMED_CONFIGURATION);
+                            return error_code(
+                                    error_code::MALFORMED_CONFIGURATION,
+                                    "Wrong connectivity option described");
                         }
                     }
                 } else if (con["bluetooth"]) {
@@ -77,13 +83,15 @@ namespace DeviceBridge {
                             con_info.type = "mac";
                             con_info.value = bt["mac"].as<std::string>();
                         } else {
-                            // TODO: add message
-                            return error_code(error_code::MALFORMED_CONFIGURATION);
+                            return error_code(
+                                    error_code::MALFORMED_CONFIGURATION,
+                                    "Wrong connectivity option described");
                         }
                     }
                 } else {
-                    // TODO: add message
-                    return error_code(error_code::MALFORMED_CONFIGURATION);
+                    return error_code(
+                            error_code::MALFORMED_CONFIGURATION,
+                            "Wrong connectivity type");
                 }
             }
         }
@@ -106,7 +114,9 @@ namespace DeviceBridge {
             yaml << YAML::EndMap;
             return error_code();
         }
-        return error_code(error_code::FILE_NOT_OPENED);
+        return error_code(
+                error_code::FILE_NOT_OPENED,
+                "Dump destination is not ready");
     }
 
 } /* namespace DeviceBridge */
