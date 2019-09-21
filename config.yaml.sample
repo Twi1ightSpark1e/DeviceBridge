@@ -1,0 +1,27 @@
+# What your device will be able to do? E.g. participating in clipboard sharing,
+#   or sending files over LAN, or it can be wifi-hotspot for your neighbors.
+# Currently possible values are all below.
+capabilities:
+    - clipboard
+    - file
+    - wifi-hotspot
+    - bluetooth
+
+# Here is your neighbors list. Every neighbour MUST have at least:
+#   - name;
+#   - at least one connectivity method (lan, bluetooth).
+# Connectivity options and methods order is important. DeviceBridge will
+#   try them one by one to establish connection.
+neighbors:
+    - name: 'MyPhone'
+      connectivity:
+          - lan:
+              - mac: '00:11:22:33:44:55'
+              - ip: '10.0.0.1'
+              - ipv6: '::1'
+          - bluetooth:
+              - mac: '66:77:88:99:aa:bb'
+    - name: 'MyPC'
+      connectivity:
+          - lan:
+              - mac: 'cc:ee:ff:00:11:22'
