@@ -5,5 +5,5 @@
 
 int main(int argc, char *argv[]) {
     DeviceBridge::application app(argc, argv);
-    return app.start().normal_exit();
+    return app.start().raw();
 }

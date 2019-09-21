@@ -40,9 +40,7 @@ namespace DeviceBridge {
         }
 
         if (!config["neighbors"]) {
-            // TODO: don't print directly, just pass with `error_code`
-            std::cout << "Neighbors aren't in configuration file" << std::endl;
-            return error_code();
+            return error_code("Neighbors aren't in configuration file");
         }
 
         const auto &neighbors = config["neighbors"];
@@ -55,7 +53,7 @@ namespace DeviceBridge {
 
             auto &n = m_neighbors.emplace_back();
             n.name = nei_node["name"].as<std::string>();
-            // TODO: add n.connectivities.reserve ?
+            n.connectivities.reserve(nei_node["connectivity"].size());
             for (const auto &con : nei_node["connectivity"]) {
                 if (con["lan"]) {
                     const auto &lan = con["lan"];
@@ -68,6 +66,9 @@ namespace DeviceBridge {
                         } else if (l["ip"]) {
                             con_info.type = "ip";
                             con_info.value = l["ip"].as<std::string>();
+                        } else if (l["ipv6"]) {
+                            con_info.type = "ipv6";
+                            con_info.value = l["ipv6"].as<std::string>();
                         } else {
                             return error_code(
                                     error_code::MALFORMED_CONFIGURATION,

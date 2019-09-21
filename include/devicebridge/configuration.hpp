@@ -26,7 +26,7 @@ namespace DeviceBridge {
          * \param path Configuration file path
          * \return Is file parsed successfully
          */
-        error_code set_path(const std::filesystem::path &path);
+        [[nodiscard]] error_code set_path(const std::filesystem::path &path);
 
         /*! \brief Dump current configuration
          *
@@ -35,10 +35,10 @@ namespace DeviceBridge {
          * \param out Output stream
          * \return Error code
          */
-        error_code dump(std::ostream &out);
+        [[nodiscard]] error_code dump(std::ostream &out);
 
     protected:
-        error_code parse_file();
+        [[nodiscard]] error_code parse_file();
 
         std::filesystem::path m_path; /*!< Configuration file path >*/
         std::vector<std::string> m_capabilities; /*!< Capabilities list >*/

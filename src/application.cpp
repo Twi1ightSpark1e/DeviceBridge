@@ -26,7 +26,7 @@ namespace DeviceBridge {
     application::~application() {  }
 
     error_code application::start() {
-        { // print help
+        { // print help, if required
             auto res = m_boolargs.find("help");
             if ((res != m_boolargs.end()) && res->second) {
                 print_help();
@@ -36,8 +36,7 @@ namespace DeviceBridge {
         { // load configuration
             try {
                 auto res = m_strargs.at("config");
-                auto err = m_config.set_path(res);
-                if (err) { return err; }
+                m_config.set_path(res).handle();
             } catch (const std::out_of_range &exc) {
                 return error_code(
                         error_code::FILE_NOT_OPENED,
@@ -49,8 +48,14 @@ namespace DeviceBridge {
                         "Generic error");
             }
         }
-
-        std::cout << '\n';
+        { // dump configuration, if required
+            auto res = m_boolargs.find("dump");
+            if (res != m_boolargs.end() && res->second) {
+                m_config.dump(std::cout).handle();
+                std::cout << '\n';
+                return error_code();
+            }
+        }
         return error_code();
     }
 
@@ -63,6 +68,7 @@ namespace DeviceBridge {
                 /* Argument styles: no_argument, required_argument, optional_argument */
                 {"help",    no_argument,        0,  'h'},
                 {"config",  required_argument,  0,  'c'},
+                {"dump",    no_argument,        0,  'd'},
                 {0,0,0,0}
             };
 
@@ -70,7 +76,7 @@ namespace DeviceBridge {
                 no_argument: " "
                 required_argument: ":"
                 optional_argument: "::" */
-            static std::string short_options("hc:");
+            static std::string short_options("hc:d");
 
             int option_index = 0;
             choice = getopt_long(argc, argv, short_options.c_str(),
@@ -87,6 +93,10 @@ namespace DeviceBridge {
 
                 case 'c':
                     m_strargs["config"] = optarg;
+                    break;
+
+                case 'd':
+                    m_boolargs["dump"] = true;
                     break;
 
                 case '?':
@@ -108,13 +118,16 @@ namespace DeviceBridge {
         std::cout << "Authored by Twi1ightSpark1e\n\n";
 
         std::cout << "Usage:\n";
-        std::cout << "    " << m_execname << " [-h] [-c|--config=filename]\n\n";
+        std::cout << "    " << m_execname << " [-h] [-c|--config=filename] [-d|--dump]\n\n";
 
         std::cout << "Where:\n";
         std::cout << "       -h        Show this message\n\n";
 
-        std::cout << "       -c        Use selected configuration file,\n";
-        std::cout << " --config        instead of default one\n";
+        std::cout << "       -c        Use selected configuration file, instead of default one\n";
+        std::cout << " --config\n\n";
+
+        std::cout << "       -d        Dump loaded configuration file into standard output\n";
+        std::cout << "   --dump\n";
     }
 
 } // namespace DeviceBridge

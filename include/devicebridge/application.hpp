@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DEVICEBRIDGE_APPLICATION_HPP
+#define DEVICEBRIDGE_APPLICATION_HPP
 
 #include <devicebridge/configuration.hpp>
 #include <devicebridge/error.hpp>
@@ -9,11 +10,11 @@
 #include <vector>
 
 namespace DeviceBridge {
+
     /*! \class application
      *  \brief Describes application work logic
      */
-    class application
-    {
+    class application {
     public:
         /*! \brief Basic constructor
          *
@@ -27,8 +28,6 @@ namespace DeviceBridge {
 
         application(const application&) = delete;
         application& operator=(const application&) = delete;
-        application(application&&) = delete;
-        application& operator=(application&&) = delete;
 
         /*! \brief Entry point
          *
@@ -36,7 +35,7 @@ namespace DeviceBridge {
          *
          * \return Exit code
          */
-        error_code start();
+        [[nodiscard]] error_code start();
 
     protected:
         /*! \brief Parse incoming arguments
@@ -58,5 +57,7 @@ namespace DeviceBridge {
 
         configuration m_config; /*!< Configuration file parser >*/
     };
+
 } // namespace DeviceBridge
 
+#endif /* end of include guard */
