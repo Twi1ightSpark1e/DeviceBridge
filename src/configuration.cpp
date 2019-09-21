@@ -45,15 +45,21 @@ namespace DeviceBridge {
 
         const auto &neighbors = config["neighbors"];
         for (auto nei_node: neighbors) {
-            if (!nei_node["name"] || !nei_node["connectivity"]) {
+            if (!nei_node["name"]) {
                 return error_code(
                         error_code::MALFORMED_CONFIGURATION,
-                        "One of neighbors does not have name or connectivity methods");
+                        "One of neighbors does not have name");
             }
-
             auto &n = m_neighbors.emplace_back();
             n.name = nei_node["name"].as<std::string>();
+
+            if (!nei_node["connectivity"]) {
+                return error_code(
+                        error_code::MALFORMED_CONFIGURATION,
+                        "Neighbour '", n.name, "' does not have connectivity methods");
+            }
             n.connectivities.reserve(nei_node["connectivity"].size());
+
             for (const auto &con : nei_node["connectivity"]) {
                 if (con["lan"]) {
                     const auto &lan = con["lan"];
@@ -72,7 +78,8 @@ namespace DeviceBridge {
                         } else {
                             return error_code(
                                     error_code::MALFORMED_CONFIGURATION,
-                                    "Wrong connectivity option described");
+                                    "Neighbour '", n.name, "' has wrong connectivity option ",
+                                    "in '", con_info.interface, "' section");
                         }
                     }
                 } else if (con["bluetooth"]) {
@@ -86,13 +93,14 @@ namespace DeviceBridge {
                         } else {
                             return error_code(
                                     error_code::MALFORMED_CONFIGURATION,
-                                    "Wrong connectivity option described");
+                                    "Neighbour '", n.name, "' has wrong connectivity option ",
+                                    "in '", con_info.interface, "' section");
                         }
                     }
                 } else {
                     return error_code(
                             error_code::MALFORMED_CONFIGURATION,
-                            "Wrong connectivity type");
+                            "Neighbour '", n.name, "' has wrong connectivity method");
                 }
             }
         }

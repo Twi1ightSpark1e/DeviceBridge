@@ -19,7 +19,7 @@ namespace DeviceBridge {
     class error_code {
     protected:
         uint8_t m_value; /*!< Error code itseft >*/
-        std::shared_ptr<char> m_message; /*!< Error message >*/
+        std::ostringstream m_message; /*!< Error message >*/
 
     public:
         static constexpr uint8_t
@@ -35,7 +35,7 @@ namespace DeviceBridge {
          * \param argc Execute arguments amount
          * \param argv Execute arguments
          */
-        constexpr error_code(void) noexcept : m_value(NO_ERROR), m_message(0) {  }
+        error_code(void) noexcept : m_value(NO_ERROR) {  }
 
         /*! \brief Warning constructor
          *
@@ -43,9 +43,9 @@ namespace DeviceBridge {
          *
          * \param message Message that will be stored
          */
-        constexpr error_code(const std::string_view& message) noexcept
-                : m_value(NO_ERROR), m_message(0) {
-            copy_str(message);
+        template<typename... Args>
+        error_code(Args&&... args) noexcept : m_value(NO_ERROR) {
+            (m_message << ... << args);
         }
 
         /*! \brief Quiet error constructor
@@ -54,7 +54,7 @@ namespace DeviceBridge {
          *
          * \param value Error code
          */
-        constexpr error_code(uint8_t value) noexcept : m_value(value), m_message(0) {  }
+        error_code(uint8_t value) noexcept : m_value(value) {  }
 
         /*! \brief Verbose error constructor
          *
@@ -63,14 +63,14 @@ namespace DeviceBridge {
          * \param value Error code
          * \param message Message that will be stored
          */
-        constexpr error_code(uint8_t value, const std::string_view& message) noexcept
-                : m_value(value), m_message(0) {
-            copy_str(message);
+        template<typename... Args>
+        error_code(uint8_t value, Args&&... args) noexcept : m_value(value) {
+            (m_message << ... << args);
         }
 
-        constexpr auto raw() const noexcept { return m_value; };
-        constexpr operator uint8_t() const noexcept { return m_value; };
-        constexpr operator bool() const noexcept { return m_value != NO_ERROR; };
+        auto raw() const noexcept { return m_value; };
+        operator uint8_t() const noexcept { return m_value; };
+        operator bool() const noexcept { return m_value != NO_ERROR; };
 
         /*! \brief Get error code's string representation
          *
@@ -86,8 +86,8 @@ namespace DeviceBridge {
 
             std::ostringstream oss;
 
-            if (!*this && m_message) { // Warning constructor were used
-                oss << "Warning: " << m_message.get();
+            if (!*this && has_message()) { // Warning constructor were used
+                oss << "Warning: " << m_message.str();
                 return oss.str();
             }
 
@@ -96,8 +96,8 @@ namespace DeviceBridge {
             auto res = messages.find(m_value);
             if (res != messages.end()) {
                 oss << "Error '" << res->second << "'";
-                if (m_message) {
-                    oss << ": " << m_message.get();
+                if (has_message()) {
+                    oss << ": " << m_message.str();
                 }
                 return oss.str();
             }
@@ -105,8 +105,12 @@ namespace DeviceBridge {
         }
 
         /*! \brief Is everything-is-okay constructor were used */
-        constexpr bool is_empty() const noexcept {
-            return !(*this || m_message);
+        bool is_empty() const noexcept {
+            return !(*this || has_message());
+        }
+
+        bool has_message() const noexcept {
+            return m_message.str().size() != 0;
         }
 
         /*! \brief Handles current error state
@@ -114,19 +118,13 @@ namespace DeviceBridge {
          *  If there is a warning or error inside - print it.
          *  If there is an error inside -- exit after that.
          */
-        constexpr void handle() const noexcept {
+        void handle() const noexcept {
             if (!is_empty()) {
                 std::cerr << to_string() << '\n';
             }
             if (*this) {
                 ::exit(m_value);
             }
-        }
-
-    protected:
-        void copy_str(const std::string_view& message) {
-            m_message.reset(new char[strlen(message.data())]);
-            strcpy(m_message.get(), message.data());
         }
     };
 
